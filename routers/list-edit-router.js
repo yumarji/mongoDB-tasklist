@@ -26,8 +26,8 @@ listEditRouter.post(
 );
 /* ruta:  http://127.0.0.1:3000/api/add
   {
-    "task": "task 4",
-    "description": "Buy the gift",
+    "task": "task 6",
+    "description": "Go to tle cinema",
     "status": "incomplete"
   }
 */
