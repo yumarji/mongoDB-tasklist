@@ -3,18 +3,19 @@ const listViewRouter = express.Router();
 const checkToken = require("../middlewares/checkToken");
 const checkRol = require("../middlewares/checkRol");
 const connectDB = require("../db");
-
+const ModelTask = require("../schemas/taskModel");
+//[checkToken, checkRol]
 //Ruta para ver todas las tareas
-listViewRouter.get("/api/list", [checkToken, checkRol], async (req, res) => {
+listViewRouter.get("/api/list", async (req, res) => {
   try {
-    const db = await connectDB();
-    const collection = db.collection("tasklist");
-    const tasks = await collection.find({}).toArray();
+    await connectDB();
+    const tasks = await ModelTask.find({});
+    console.log(tasks);
     res.status(200).send(tasks);
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
-}); //Ruta  http://127.0.0.1:3000/list
+}); //Ruta  http://127.0.0.1:8080/api/list
 
 //Ruta para ver las tareas completadas
 listViewRouter.get(
@@ -22,20 +23,17 @@ listViewRouter.get(
   [checkToken, checkRol],
   async (req, res) => {
     try {
-      const db = await connectDB();
-      const collection = db.collection("tasklist");
-      const tasks = await collection
-        .aggregate([
-          { $match: { status: "completed" } },
-          { $sort: { task: 1 } },
-        ])
-        .toArray();
+      await connectDB();
+      const tasks = await ModelTask.aggregate([
+        { $match: { state: "completed" } },
+        { $sort: { task: 1 } },
+      ]);
       res.status(200).send(tasks);
     } catch (error) {
       res.status(400).send({ message: error.message });
     }
   }
-); //Ruta  http://127.0.0.1:3000/listCompleted
+); //Ruta  http://127.0.0.1:8080/api/listCompleted
 
 //Ruta para ver las tareas Incompletas
 listViewRouter.get(
@@ -43,19 +41,16 @@ listViewRouter.get(
   [checkToken, checkRol],
   async (req, res) => {
     try {
-      const db = await connectDB();
-      const collection = db.collection("tasklist");
-      const tasks = await collection
-        .aggregate([
-          { $match: { status: "incomplete" } },
-          { $sort: { task: 1 } },
-        ])
-        .toArray();
+      await connectDB();
+      const tasks = await ModelTask.aggregate([
+        { $match: { state: "incomplete" } },
+        { $sort: { task: 1 } },
+      ]);
       res.status(200).send(tasks);
     } catch (error) {
       res.status(400).send({ message: error.message });
     }
   }
-); //Ruta  http://127.0.0.1:3000/listIncomplete
+); //Ruta  http://127.0.0.1:8080/list-incomplete/
 
 module.exports = listViewRouter;

@@ -2,7 +2,6 @@
 
 module.exports = function validPost(req, res, next) {
   const newTask = req.body;
-  console.log(newTask.isCompleted);
 
   if (Object.keys(newTask).length === 0) {
     return res.status(400).send({ error: "Body don't have any value." });
@@ -10,11 +9,8 @@ module.exports = function validPost(req, res, next) {
     return res.status(400).send({ error: "Task is invalid." });
   } else if (!newTask.description) {
     return res.status(400).send({ error: "Description is invalid." });
-  } else if (
-    newTask.status !== "completed" &&
-    newTask.status !== "incomplete"
-  ) {
-    return res.status(400).send({ error: "isCompleted is invalid." });
+  } else if (newTask.state !== "completed" && newTask.state !== "incomplete") {
+    return res.status(400).send({ error: "State is invalid." });
   } else {
     next();
   }

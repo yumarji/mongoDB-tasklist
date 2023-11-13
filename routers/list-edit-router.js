@@ -6,7 +6,7 @@ const validId = require("../middlewares/validId");
 const checkToken = require("../middlewares/checkToken");
 const checkRol = require("../middlewares/checkRol");
 const connectDB = require("../db");
-const { ObjectId } = require("mongodb");
+const ModelTask = require("../schemas/taskModel");
 
 //Ruta para agregar tareas
 listEditRouter.post(
@@ -14,21 +14,21 @@ listEditRouter.post(
   [checkToken, checkRol, validPost],
   async (req, res) => {
     try {
-      const newtask = req.body;
-      const db = await connectDB();
-      const collection = db.collection("tasklist");
-      const tasks = await collection.insertOne(newtask);
+      await connectDB();
+      const newtask = await new ModelTask(req.body);
+      newtask.save();
+      const tasks = await ModelTask.find({});
       res.status(200).send({ message: "Task was added." });
     } catch (error) {
-      res.status(400).send({ message: error.message });
+      throw new error();
     }
   }
 );
-/* ruta:  http://127.0.0.1:3000/api/add
+/* ruta:  http://127.0.0.1:8080/api/add
   {
     "task": "task 6",
     "description": "Go to the cinema",
-    "status": "incomplete"
+    "state": "incomplete"
   }
 */
 
@@ -38,17 +38,16 @@ listEditRouter.delete(
   [checkToken, checkRol, validId],
   async (req, res) => {
     try {
-      const idTask = new ObjectId(req.params.id);
-      const db = await connectDB();
-      const collection = db.collection("tasklist");
-      const tasks = await collection.deleteOne({ _id: { $eq: idTask } });
+      const idTask = req.params.id;
+      await connectDB();
+      const tasks = await ModelTask.deleteOne({ _id: { $eq: idTask } });
       res.status(200).send({ message: "Task was deleted." });
     } catch (error) {
-      res.status(400).send({ message: error.message });
+      throw new Error();
     }
   }
 );
-//ruta:   http://127.0.0.1:3000/api/delete/id
+//ruta:   http://127.0.0.1:8080/api/delete/id
 
 //Ruta para editar tareas
 listEditRouter.put(
@@ -56,25 +55,24 @@ listEditRouter.put(
   [checkToken, checkRol, validId, validPut],
   async (req, res) => {
     try {
-      const idTask = new ObjectId(req.params.id);
+      const idTask = req.params.id;
       const taskEdit = req.body;
-      const db = await connectDB();
-      const collection = db.collection("tasklist");
-      const tasks = await collection.updateOne(
+      await connectDB();
+      const tasks = await ModelTask.updateOne(
         { _id: { $eq: idTask } },
         { $set: taskEdit }
       );
       res.status(200).send({ message: "Task was updated." });
     } catch (error) {
-      res.status(400).send({ message: error.message });
+      throw new Error();
     }
   }
 );
-/*ruta:   http://127.0.0.1:3000/api/update/id
+/*ruta:   http://127.0.0.1:8080/api/edit/id
  {
-            "task": "task 20",
-            "description": "go to the gym",
-            "status": "completed"
+            "task": "task 6",
+            "description": "Send an email",
+            "state": "incomplete"
         }
 */
 

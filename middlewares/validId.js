@@ -1,15 +1,13 @@
 ////Middleware para validar que el ID se encuentre dentro de la lista de tareas, es utilizado en los métodos DELETE y PUT.
-
-const { ObjectId } = require("mongodb");
 const connectDB = require("../db");
+const ModelTask = require("../schemas/taskModel");
 
-module.exports = async function (req, res, next) {
+module.exports = async function validId(req, res, next) {
   try {
-    const idTask = new ObjectId(req.params.id);
-    const db = await connectDB();
-    const collection = db.collection("tasklist");
-    const task = await collection.findOne({ _id: idTask });
-    if (!task) {
+    const idTask = req.params.id;
+    await connectDB();
+    const tasks = await ModelTask.findOne({ _id: idTask });
+    if (!tasks) {
       return res.status(400).send({ error: "ID doesn't exist." });
     } else {
       next();
